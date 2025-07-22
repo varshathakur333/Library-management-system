@@ -1,0 +1,192 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Book {
+private:
+    string name;
+    string author;
+    bool isBorrowed;
+
+public:
+    Book(string name, string author) {
+        this->name = name;
+        this->author = author;
+        this->isBorrowed = false;
+    }
+
+    string getBookName() const {
+        return this->name;
+    }
+
+    string getAuthorName() const {
+        return this->author;
+    }
+
+    bool BorrowedStatus() const {
+        return this->isBorrowed;
+    }
+
+    void setBookStatus(bool f) {
+        this->isBorrowed = f;
+    }
+};
+
+class Library {
+private:
+    vector<Book> list;
+
+public:
+    Library() {}
+
+    void addBook(string name, string author) {
+        Book b(name, author);
+        list.push_back(b);
+        cout << "[+] Book added successfully!" << endl;
+    }
+
+    void returnBook(int index) {
+        if (list.empty() || index < 0 || index >= list.size()) {
+            cout << "[!] Invalid index!" << endl;
+            return;
+        }
+        if (!list[index].BorrowedStatus()) {
+            cout << "[!] Book is not currently borrowed!" << endl;
+            return;
+        }
+        list[index].setBookStatus(false);
+        cout << "[+] Book returned successfully!" << endl;
+    }
+
+    void displayBooks() const {
+        if (list.empty()) {
+            cout << "[*] No books in the library." << endl;
+            return;
+        }
+        cout << "\n==> List of All Books:\n";
+        for (int i = 0; i < list.size(); i++) {
+            cout << "[" << (i + 1) << "] "
+                 << "Title: " << list[i].getBookName()
+                 << " | Author: " << list[i].getAuthorName()
+                 << " | Status: " << (list[i].BorrowedStatus() ? "Borrowed" : "Available") << endl;
+        }
+    }
+
+    void displayBorrowedBooks() {
+        bool found = false;
+        cout << "\n==> Borrowed Books:\n";
+        for (int i = 0; i < list.size(); i++) {
+            if (list[i].BorrowedStatus()) {
+                cout << "[" << (i + 1) << "] "
+                     << "Title: " << list[i].getBookName()
+                     << " | Author: " << list[i].getAuthorName() << endl;
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "[*] No books are currently borrowed." << endl;
+        }
+    }
+
+    void borrow(int index) {
+        if (list.empty() || index < 0 || index >= list.size()) {
+            cout << "[!] Invalid index!" << endl;
+            return;
+        }
+        if (list[index].BorrowedStatus()) {
+            cout << "[!] Book is already borrowed!" << endl;
+            return;
+        }
+        list[index].setBookStatus(true);
+        cout << "[+] Book borrowed successfully!" << endl;
+    }
+};
+
+// Function to handle librarian login
+bool loginAsAdmin() {
+    string username, password;
+    cout << "\n== Librarian Login ==" << endl;
+    cout << "Username: ";
+    cin >> username;
+    cout << "Password: ";
+    cin >> password;
+
+    if (username == "admin" && password == "lib123") {
+        cout << "[+] Login successful! You are now logged in as librarian.\n";
+        return true;
+    } else {
+        cout << "[!] Invalid credentials. You are logged in as a regular user.\n";
+        return false;
+    }
+}
+
+int main() {
+    Library lb;
+    bool isAdmin = loginAsAdmin();
+
+    int choice;
+
+    while (true) {
+        cout << "\n================ Library Menu ================" << endl;
+        if (isAdmin) cout << "1 -> Add Book (Admin Only)" << endl;
+        cout << "2 -> Return Book" << endl;
+        cout << "3 -> Borrow Book" << endl;
+        cout << "4 -> Display All Books" << endl;
+        cout << "5 -> Display Borrowed Books" << endl;
+        cout << "6 -> Exit" << endl;
+        cout << "==============================================" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                if (!isAdmin) {
+                    cout << "[!] Access denied. Only librarian can add books.\n";
+                    break;
+                }
+                string name, author;
+                cout << "Enter book title: ";
+                cin.ignore();
+                getline(cin, name);
+                cout << "Enter author name: ";
+                getline(cin, author);
+                lb.addBook(name, author);
+                break;
+            }
+            case 2: {
+                lb.displayBorrowedBooks();
+                int index;
+                cout << "Enter the index of the book to return: ";
+                cin >> index;
+                lb.returnBook(index - 1);
+                break;
+            }
+            case 3: {
+                lb.displayBooks();
+                int index;
+                cout << "Enter the index of the book to borrow: ";
+                cin >> index;
+                lb.borrow(index - 1);
+                break;
+            }
+            case 4: {
+                lb.displayBooks();
+                break;
+            }
+            case 5: {
+                lb.displayBorrowedBooks();
+                break;
+            }
+            case 6: {
+                cout << "[x] Exiting Library System. Goodbye!" << endl;
+                return 0;
+            }
+            default: {
+                cout << "[!] Invalid choice, please try again." << endl;
+                break;
+            }
+        }
+    }
+}
